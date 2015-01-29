@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 
+import org.mgechev.distrelang.Scheduler;
 import org.mgechev.elang.interpreter.Interpreter;
 import org.mgechev.elang.lexer.Lexer;
 import org.mgechev.elang.parser.Parser;
+import org.mgechev.elang.tokens.KeyWordToken;
 import org.mgechev.elang.tokens.Token;
 
 public class ELang {
@@ -33,9 +35,19 @@ public class ELang {
         program = currentProgram;
     }
     
-    public static void execute() {
+    public static void execute(Scheduler scheduler) {
         Lexer l = new Lexer(program);
         ArrayList<Token> lst = l.lex();
+        ArrayList<Token> fn;
+        for (Token token : lst) {
+            if (token instanceof KeyWordToken && token.value().equals("def")) {
+                fn = new ArrayList<Token>();
+                fn.add(token);
+            }
+            if (token instanceof KeyWordToken && token.value().equals("enddef")) {
+                //
+            }
+        }
         
         Parser parser = new Parser(lst);
         parser.parse();
