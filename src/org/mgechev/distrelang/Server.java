@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 
+import org.mgechev.distrelang.messages.Invoke;
 import org.mgechev.distrelang.messages.Message;
 import org.mgechev.distrelang.messages.RegisterFunction;
 import org.mgechev.elang.parser.Parser;
@@ -28,6 +29,10 @@ public class Server {
         this.port = port;
     }
     
+    public void invokeFunction(Invoke msg, Socket socket) {
+        
+    }
+    
     public void listen() {
         try {
             final ServerSocket socket = new ServerSocket(this.port);
@@ -39,12 +44,15 @@ public class Server {
                         OutputStream os = client.getOutputStream();
                         InputStream is = client.getInputStream();
                         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                        Parser parser = new Parser();
+                        Parser parser;
                         Gson gson = new Gson();
                         while (!socket.isClosed()) {
                             String line = reader.readLine();
                             Message fn = gson.fromJson(line, Message.class);
-                            
+                            switch (fn.type) {
+                            case INVOKE:
+                                self.invokeFunction(gson.fromJson(line, Invoke.class), client);
+                            }
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
