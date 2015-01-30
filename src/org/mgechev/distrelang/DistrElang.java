@@ -1,4 +1,4 @@
-package org.mgechev.elang;
+package org.mgechev.distrelang;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,14 +7,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.mgechev.distrelang.Scheduler;
 import org.mgechev.elang.interpreter.Interpreter;
 import org.mgechev.elang.lexer.Lexer;
 import org.mgechev.elang.parser.Parser;
 import org.mgechev.elang.tokens.KeyWordToken;
 import org.mgechev.elang.tokens.Token;
 
-public class ELang {
+public class DistrElang {
     
     private static String program = "";
     

@@ -6,8 +6,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import org.mgechev.elang.ELang;
-
 public class Main {
 
     public static void main(String[] args) throws IOException {
@@ -24,8 +22,8 @@ public class Main {
         Server s3 = new Server(55553);
         s3.start();
         
-        ELang.loadProgramString("def sum(a, b) return a + b; enddef; def sum2(a) return sum(a, 2); enddef; print sum(1, 3); print '\n'; print sum2(3);");
-        ELang.execute(scheduler);
+        DistrElang.loadProgramString("def sum(a, b) return a + b; enddef; def sum2(a) return sum(a, 2); enddef; print sum(1, 3); print '\n'; print sum2(3);");
+        DistrElang.execute(scheduler);
     }
     
 }
