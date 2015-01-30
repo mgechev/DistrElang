@@ -32,6 +32,7 @@ public class Expression implements IExpression {
                 if (currentEvaluator instanceof Function) {
                     Function func = ((Function) currentEvaluator);
                     int currentArg = 0;
+                    func.reset();
                     while (currentArg < func.getArgumentsCount()) {
                         temp = (IExpression)stack.pop();
                         func.setOperand(temp);

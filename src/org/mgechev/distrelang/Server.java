@@ -40,6 +40,9 @@ public class Server extends Thread {
     
     private void invokeFunction(Invoke msg, Socket socket) throws IOException {
         CustomFunction fn = Program.Get().getFunction(msg.name);
+        if (msg.name.equals("sum2")) {
+            System.out.println("TEST");
+        }
         for (Value val : msg.args) {
             fn.setOperand(val);
         }

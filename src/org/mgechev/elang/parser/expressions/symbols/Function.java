@@ -1,5 +1,7 @@
 package org.mgechev.elang.parser.expressions.symbols;
 
+import java.util.Stack;
+
 
 public abstract class Function extends Evaluator {
     
@@ -11,6 +13,10 @@ public abstract class Function extends Evaluator {
     
     public int getArgumentsCount() {
         return this.argsCount;
+    }
+    
+    public void reset() {
+        this.args = new Stack<Variable>();
     }
     
 }
