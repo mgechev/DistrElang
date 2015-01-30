@@ -15,8 +15,9 @@ import org.mgechev.elang.parser.statements.ReturnStatement;
 import org.mgechev.elang.parser.statements.ReturnStatementException;
 
 public class CustomFunction extends Function {
-    private ArrayList<Variable> funcArgs;
-    private ArrayList<IStatement> statements;
+    protected ArrayList<Variable> funcArgs;
+    protected ArrayList<IStatement> statements;
+    protected String name;
     
     public CustomFunction() {
         super(0);
@@ -30,6 +31,10 @@ public class CustomFunction extends Function {
         super(funcArgs.size());
         this.funcArgs = funcArgs;
         this.statements = statements;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
     }
     
     public Value evaluate() {
