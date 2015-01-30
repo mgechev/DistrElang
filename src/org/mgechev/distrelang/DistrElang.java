@@ -57,7 +57,10 @@ public class DistrElang {
             if (functionDef) {
                 fn.add(token);
             }
-        }        
+        }
+        
+        scheduler.finalize();
+        
         Parser parser = new Parser(lst);
         parser.parse();
         

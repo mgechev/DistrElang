@@ -23,6 +23,7 @@ import org.mgechev.distrelang.messages.RegisterFunction;
 import org.mgechev.distrelang.messages.Return;
 import org.mgechev.distrelang.messages.SymbolTable;
 import org.mgechev.elang.parser.expressions.IExpression;
+import org.mgechev.elang.parser.expressions.symbols.Variable;
 import org.mgechev.elang.tokens.Token;
 
 import com.google.gson.Gson;
@@ -41,7 +42,7 @@ public class Scheduler {
         mapper = new HashMap<String, Socket>();
     }
     
-    public IExpression invoke(String fun, ArrayList<IExpression> args) throws IOException {
+    public IExpression invoke(String fun, ArrayList<Variable> args) throws IOException {
         Socket socket = mapper.get(fun);
         if (socket.isClosed()) {
             return null;

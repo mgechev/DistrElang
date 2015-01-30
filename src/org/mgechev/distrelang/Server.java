@@ -7,19 +7,23 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.mgechev.distrelang.messages.Invoke;
 import org.mgechev.distrelang.messages.Message;
 import org.mgechev.distrelang.messages.RegisterComplete;
 import org.mgechev.distrelang.messages.RegisterFunction;
+import org.mgechev.distrelang.messages.Return;
 import org.mgechev.distrelang.messages.SymbolTable;
 import org.mgechev.elang.common.Program;
 import org.mgechev.elang.parser.Parser;
+import org.mgechev.elang.parser.expressions.symbols.Value;
 import org.mgechev.elang.parser.expressions.symbols.functions.CustomFunction;
 import org.mgechev.elang.parser.statements.IStatement;
 import org.mgechev.elang.tokens.Token;
@@ -33,13 +37,23 @@ import sun.org.mozilla.javascript.internal.json.JsonParser;
 public class Server extends Thread {
 
     private int port;
+    private Map<String, InetSocketAddress> symbolTable;
+    private Map<String, Socket> sockets;
+    private Scheduler scheduler;
 
     public Server(int port) {
         this.port = port;
+        this.sockets = new HashMap<String, Socket>();
     }
     
-    private void invokeFunction(Invoke msg, Socket socket) {
-        System.out.println("Invoke function" + msg.name);
+    private void invokeFunction(Invoke msg, Socket socket) throws IOException {
+        CustomFunction fn = Program.Get().getFunction(msg.name);
+        fn.setArguments(msg.args);
+        Value result = fn.evaluate();
+        Return res = new Return();
+        res.name = msg.name;
+        res.result = result;
+        this.send(res, socket);
     }
     
     private void registerFunction(RegisterFunction msg, Socket client) throws IOException {
@@ -75,7 +89,7 @@ public class Server extends Thread {
     }
     
     private void saveSymbolTable(SymbolTable msg) {
-        System.out.println("SymbolTable");
+        this.symbolTable = msg.table;
     }
     
     public void run() {
