@@ -2,6 +2,8 @@ package org.mgechev.elang.common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import org.mgechev.elang.parser.expressions.symbols.Value;
@@ -90,6 +92,10 @@ public class Program {
     
     public void addFunction(String name, CustomFunction function) {
         this.customFunctions.put(name, function);
+    }
+    
+    public Set<String> getFunctionsNames() {
+        return this.customFunctions.keySet();
     }
     
     public CustomFunction getFunction(String name) {

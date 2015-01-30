@@ -26,6 +26,7 @@ import org.mgechev.elang.parser.expressions.IExpression;
 import org.mgechev.elang.tokens.Token;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class Scheduler {
     
@@ -88,17 +89,18 @@ public class Scheduler {
     }
     
     private void send(Message msg, Socket socket) throws IOException {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Token.class, new InterfaceAdapter<Token>()).create();
         String toSend = gson.toJson(msg);
         OutputStream os = socket.getOutputStream();
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
         writer.write(toSend + "\n");
+        writer.flush();
     }
     
     private Message read(Socket socket, Class type) throws IOException {
         InputStream is = socket.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Token.class, new InterfaceAdapter<Token>()).create();
         return gson.fromJson(reader.readLine(), type);
     }
 

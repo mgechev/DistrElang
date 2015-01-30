@@ -5,10 +5,10 @@ import org.mgechev.elang.common.Operators;
 public class OperatorToken extends Token<Operators> {
 
     public OperatorToken(String symbol) {
-        this.value = this.getOperatorByString(symbol);
+        super(getOperatorByString(symbol));
     }
     
-    private Operators getOperatorByString(String symbol) {
+    private static Operators getOperatorByString(String symbol) {
         if (symbol.equals("+")) {
             return Operators.PLU;
         } else if (symbol.equals("-")) {

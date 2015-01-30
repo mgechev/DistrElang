@@ -3,7 +3,9 @@ package org.mgechev.elang;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.mgechev.distrelang.Scheduler;
 import org.mgechev.elang.interpreter.Interpreter;
@@ -35,20 +37,28 @@ public class ELang {
         program = currentProgram;
     }
     
-    public static void execute(Scheduler scheduler) {
+    public static void execute(Scheduler scheduler) throws IOException {
         Lexer l = new Lexer(program);
         ArrayList<Token> lst = l.lex();
-        ArrayList<Token> fn;
-        for (Token token : lst) {
+        ArrayList<Token> fn = null;
+        boolean functionDef = false;
+        Iterator<Token> iter = lst.iterator();
+        while (iter.hasNext()) {
+            Token token = iter.next();
             if (token instanceof KeyWordToken && token.value().equals("def")) {
                 fn = new ArrayList<Token>();
-                fn.add(token);
+                functionDef = true;
             }
             if (token instanceof KeyWordToken && token.value().equals("enddef")) {
-                //
+                fn.add(token);
+                fn.add(iter.next());
+                scheduler.register(fn);
+                functionDef = false;
             }
-        }
-        
+            if (functionDef) {
+                fn.add(token);
+            }
+        }        
         Parser parser = new Parser(lst);
         parser.parse();
         
