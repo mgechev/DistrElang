@@ -35,12 +35,13 @@ public class Scheduler {
         this.symbolTable.put(res.name, host);
     }
     
-    public void finalize() throws IOException {
+    public Map<String, InetSocketAddress> done() throws IOException {
         SymbolTable table = new SymbolTable();
         table.table = this.symbolTable;
         for (InetSocketAddress addr : this.sockets.keySet()) {
             ConnectionProxy.Get().send(table, addr);;
         }
+        return this.symbolTable;
     }
 
 }

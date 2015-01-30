@@ -37,13 +37,9 @@ import sun.org.mozilla.javascript.internal.json.JsonParser;
 public class Server extends Thread {
 
     private int port;
-    private Map<String, InetSocketAddress> symbolTable;
-    private Map<String, Socket> sockets;
-    private Scheduler scheduler;
 
     public Server(int port) {
         this.port = port;
-        this.sockets = new HashMap<String, Socket>();
     }
     
     private void invokeFunction(Invoke msg, Socket socket) throws IOException {
@@ -89,7 +85,10 @@ public class Server extends Thread {
     }
     
     private void saveSymbolTable(SymbolTable msg) {
-        this.symbolTable = msg.table;
+        for (String fun : msg.table.keySet()) {
+            RemoteFunction remoteFn = new RemoteFunction(msg.table.get(fun));
+            Program.Get().addFunction(fun, remoteFn);
+        }
     }
     
     public void run() {

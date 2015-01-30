@@ -4,9 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
+import org.mgechev.elang.common.Program;
 import org.mgechev.elang.interpreter.Interpreter;
 import org.mgechev.elang.lexer.Lexer;
 import org.mgechev.elang.parser.Parser;
@@ -59,10 +62,14 @@ public class DistrElang {
             }
         }
         
-        scheduler.finalize();
-        
         Parser parser = new Parser(lst);
         parser.parse();
+
+        Map<String, InetSocketAddress> symbolTable = scheduler.done();
+        for (String fun : symbolTable.keySet()) {
+            RemoteFunction remoteFn = new RemoteFunction(symbolTable.get(fun));
+            Program.Get().addFunction(fun, remoteFn);
+        }
         
         Interpreter interpreter = new Interpreter(parser.getStatements());
         interpreter.interpret();
