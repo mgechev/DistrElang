@@ -15,14 +15,14 @@ enddef;
 
 print add(1, 2);
 print '\n';
-print add2(1);
+print add2(40);
 ```
 
 The result from the execution above will be:
 
 ```
 3
-3
+42
 ```
 
 ...as expected. The interesting thing is that the program will be executed on 3 different machines:
@@ -31,7 +31,7 @@ The result from the execution above will be:
 - The `add` function will be parsed and executed on different machine (lets call it `B`)
 - The `add2` function will be parsed and executed on third machine (lets call it `C`)
 
-When machine `A` tries to execute `add(1, 2)` it will call machine `B` where the `add` function resides. Later, during the execution of `add2(1)` machine `C` will call machine `B` in order to execute `add(1, 2)`.
+When machine `A` tries to execute `add(1, 2)` it will call machine `B` where the `add` function resides. Later, during the execution of `add2(40)` machine `C` will call machine `B` in order to execute `add(40, 2)`.
 
 This will happen using the current scheduling strategy. The scheduling strategies are (supposed to be) pluggable with different strategies.
 
