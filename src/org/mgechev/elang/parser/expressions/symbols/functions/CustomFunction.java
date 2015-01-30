@@ -20,7 +20,11 @@ public class CustomFunction extends Function {
     protected String name;
     
     public CustomFunction() {
-        super(0);
+        this(0);
+    }
+    
+    public CustomFunction(int args) {
+        super(args);
         this.funcArgs = null;
         this.statements = null;
     }

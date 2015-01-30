@@ -7,13 +7,16 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.mgechev.distrelang.messages.RemoteFunctionData;
 import org.mgechev.elang.common.Program;
 import org.mgechev.elang.interpreter.Interpreter;
 import org.mgechev.elang.lexer.Lexer;
 import org.mgechev.elang.parser.Parser;
+import org.mgechev.elang.parser.expressions.symbols.Function;
 import org.mgechev.elang.tokens.KeyWordToken;
 import org.mgechev.elang.tokens.Token;
 
@@ -63,14 +66,21 @@ public class DistrElang {
             }
         }
         
-        Parser parser = new Parser(lst);
+        Map<RemoteFunctionData, InetSocketAddress> symbolTable = scheduler.done();
+        Map<String, Function> lookup = new HashMap<String, Function>();
+        for (RemoteFunctionData fun : symbolTable.keySet()) {
+            RemoteFunction f = new RemoteFunction(symbolTable.get(fun), fun.argsCount);
+            f.setName(fun.name);
+            lookup.put(fun.name, f);
+        }
+        
+        
+        Parser parser = new Parser(lst, lookup);
         parser.parse();
         
-        Map<String, InetSocketAddress> symbolTable = scheduler.done();
-        for (String fun : symbolTable.keySet()) {
-            RemoteFunction remoteFn = new RemoteFunction(symbolTable.get(fun));
-            Program.Get().addFunction(fun, remoteFn);
-        }
+        Function f = Program.Get().getFunction("sum");
+        
+        System.out.println("********************** " + f.getClass());
         
         Interpreter interpreter = new Interpreter(parser.getStatements());
         interpreter.interpret();

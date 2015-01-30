@@ -22,7 +22,7 @@ public class Main {
         Server s3 = new Server(55553);
         s3.start();
         
-        DistrElang.loadProgramString("def sum(a, b) return a + b; enddef; def sum2(a) return sum(a, 2); enddef; print sum(1, 3); print '\n'; print sum2(3);");
+        DistrElang.loadProgramString("def sum(a, b) return a + b; enddef; def sum2(a) return sum(a, 2); enddef; print '--------'; print sum(1, 3); print '\n'; print sum2(3); print '-------';");
         DistrElang.execute(scheduler);
     }
     

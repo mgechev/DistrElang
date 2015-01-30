@@ -9,16 +9,21 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.mgechev.distrelang.messages.Invoke;
 import org.mgechev.distrelang.messages.Message;
 import org.mgechev.distrelang.messages.RegisterComplete;
 import org.mgechev.distrelang.messages.RegisterFunction;
+import org.mgechev.distrelang.messages.RemoteFunctionData;
 import org.mgechev.distrelang.messages.Return;
 import org.mgechev.distrelang.messages.SymbolTable;
 import org.mgechev.elang.common.Program;
 import org.mgechev.elang.parser.Parser;
+import org.mgechev.elang.parser.expressions.symbols.Function;
 import org.mgechev.elang.parser.expressions.symbols.Value;
+import org.mgechev.elang.parser.expressions.symbols.Variable;
 import org.mgechev.elang.parser.expressions.symbols.functions.CustomFunction;
 import org.mgechev.elang.tokens.Token;
 
@@ -35,7 +40,9 @@ public class Server extends Thread {
     
     private void invokeFunction(Invoke msg, Socket socket) throws IOException {
         CustomFunction fn = Program.Get().getFunction(msg.name);
-        fn.setArguments(msg.args);
+        for (Value val : msg.args) {
+            fn.setOperand(val);
+        }
         Value result = fn.evaluate();
         Return res = new Return();
         System.out.println("Invoking function " + msg.name);
@@ -60,8 +67,12 @@ public class Server extends Thread {
             }
             if (!exists) {
                 RegisterComplete response = new RegisterComplete();
-                response.name = name.toString();
-                System.out.println("Registered " + response.name);
+                Function fn = Program.Get().getFunction(name.toString());
+                RemoteFunctionData data = new RemoteFunctionData();
+                data.name = name.toString();
+                data.argsCount = fn.getArgumentsCount();
+                System.out.println("Registered " + data.name);
+                response.data = data;
                 this.send(response, client);
                 return;
             }
@@ -79,8 +90,10 @@ public class Server extends Thread {
     
     private void saveSymbolTable(SymbolTable msg) {
         for (String fun : msg.table.keySet()) {
-            RemoteFunction remoteFn = new RemoteFunction(msg.table.get(fun));
-            Program.Get().addFunction(fun, remoteFn);
+            RemoteFunction remoteFn = new RemoteFunction(msg.table.get(fun), msg.args.get(fun));
+            if (Program.Get().getFunction(fun) == null) {
+                Program.Get().addFunction(fun, remoteFn);
+            }
         }
     }
     

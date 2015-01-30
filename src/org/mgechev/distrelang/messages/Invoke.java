@@ -2,10 +2,10 @@ package org.mgechev.distrelang.messages;
 
 import java.util.ArrayList;
 
-import org.mgechev.elang.parser.expressions.symbols.Variable;
+import org.mgechev.elang.parser.expressions.symbols.Value;
 
 public class Invoke extends Message {
-    public ArrayList<Variable> args;
+    public ArrayList<Value> args;
     public String name;
     
     public Invoke() {

@@ -1,6 +1,7 @@
 package org.mgechev.elang.parser;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Stack;
 
 import org.mgechev.elang.common.Operators;
@@ -9,6 +10,7 @@ import org.mgechev.elang.parser.expressions.Expression;
 import org.mgechev.elang.parser.expressions.IExpression;
 import org.mgechev.elang.parser.expressions.symbols.BooleanValue;
 import org.mgechev.elang.parser.expressions.symbols.Evaluator;
+import org.mgechev.elang.parser.expressions.symbols.Function;
 import org.mgechev.elang.parser.expressions.symbols.NumberValue;
 import org.mgechev.elang.parser.expressions.symbols.Operator;
 import org.mgechev.elang.parser.expressions.symbols.StringValue;
@@ -57,13 +59,19 @@ public class Parser {
     
     private ArrayList<IStatement> statements;
     private ArrayList<Token> tokens;
+    private Map<String, Function> lookup;
     
     private int currentToken;
     
     public Parser(ArrayList<Token> tokens) {
+        this(tokens, null);
+    }
+    
+    public Parser(ArrayList<Token> tokens, Map<String, Function> lookup) {
         this.statements = new ArrayList<IStatement>();
         this.tokens = tokens;
         this.currentToken = 0;
+        this.lookup = lookup;
     }
     
     public ArrayList<IStatement> getStatements() {
@@ -481,6 +489,12 @@ public class Parser {
         } else if (func.equals("read")) {
             return new Read();
         } else {
+            if (lookup != null) {
+                Function fn = lookup.get(func);
+                if (fn != null) {
+                    return fn;
+                }
+            }
             return Program.Get().getFunction(func);
         }
     }
