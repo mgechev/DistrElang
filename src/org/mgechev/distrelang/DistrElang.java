@@ -80,8 +80,6 @@ public class DistrElang {
         
         Function f = Program.Get().getFunction("sum");
         
-        System.out.println("********************** " + f.getClass());
-        
         Interpreter interpreter = new Interpreter(parser.getStatements());
         interpreter.interpret();
         

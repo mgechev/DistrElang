@@ -31,7 +31,6 @@ public class Scheduler {
         msg.tokens = tokens;
         ConnectionProxy.Get().send(msg, host);
         RegisterComplete res = (RegisterComplete)ConnectionProxy.Get().read(host, RegisterComplete.class);
-        System.out.println("Function registered name: " + res.data.name);
         RemoteFunctionData f = res.data;
         this.symbolTable.put(f, host);
     }

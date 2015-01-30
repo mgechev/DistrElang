@@ -40,18 +40,13 @@ public class Server extends Thread {
     
     private void invokeFunction(Invoke msg, Socket socket) throws IOException {
         CustomFunction fn = Program.Get().getFunction(msg.name);
-        if (msg.name.equals("sum2")) {
-            System.out.println("TEST");
-        }
         for (Value val : msg.args) {
             fn.setOperand(val);
         }
         Value result = fn.evaluate();
         Return res = new Return();
-        System.out.println("Invoking function " + msg.name);
         res.name = msg.name;
         res.result = result;
-        System.out.println("Function " + msg.name + " result is " + res.result);
         this.send(res, socket);
     }
     
@@ -74,7 +69,6 @@ public class Server extends Thread {
                 RemoteFunctionData data = new RemoteFunctionData();
                 data.name = name.toString();
                 data.argsCount = fn.getArgumentsCount();
-                System.out.println("Registered " + data.name);
                 response.data = data;
                 this.send(response, client);
                 return;
@@ -104,14 +98,12 @@ public class Server extends Thread {
         try {
             ServerSocket socket = new ServerSocket(this.port);
             Socket client = socket.accept();
-            System.out.println("Client connected");
             InputStream is = client.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             Gson gson = new GsonBuilder().registerTypeAdapter(Token.class, new InterfaceAdapter<Token>()).create();
             while (!socket.isClosed()) {
                 String line = reader.readLine();
                 Message msg = gson.fromJson(line, Message.class);
-                System.out.println("Message received " + line + "\n");
                 if (msg == null) {
                     socket.close();
                     return;
@@ -127,7 +119,6 @@ public class Server extends Thread {
                     this.saveSymbolTable(gson.fromJson(line, SymbolTable.class));
                     break;
                 default:
-                    System.out.println("Unknown message");
                     break;
                 }
             }
