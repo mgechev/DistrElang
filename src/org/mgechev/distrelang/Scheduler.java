@@ -16,12 +16,10 @@ public class Scheduler {
     
     private ArrayList<InetSocketAddress> hosts;
     private Map<String, InetSocketAddress> symbolTable;
-    private Map<InetSocketAddress, Socket> sockets;
     private int current = 0;
     
     public Scheduler(ArrayList<InetSocketAddress> hosts) {
         this.hosts = hosts;
-        this.sockets = new HashMap<InetSocketAddress, Socket>();
         symbolTable = new HashMap<String, InetSocketAddress>();
     }
     
@@ -32,13 +30,14 @@ public class Scheduler {
         msg.tokens = tokens;
         ConnectionProxy.Get().send(msg, host);
         RegisterComplete res = (RegisterComplete)ConnectionProxy.Get().read(host, RegisterComplete.class);
+        System.out.println("Function registered name: " + res.name);
         this.symbolTable.put(res.name, host);
     }
     
     public Map<String, InetSocketAddress> done() throws IOException {
         SymbolTable table = new SymbolTable();
         table.table = this.symbolTable;
-        for (InetSocketAddress addr : this.sockets.keySet()) {
+        for (InetSocketAddress addr : this.hosts) {
             ConnectionProxy.Get().send(table, addr);;
         }
         return this.symbolTable;

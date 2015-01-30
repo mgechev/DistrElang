@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class DistrElang {
         
         Parser parser = new Parser(lst);
         parser.parse();
-
+        
         Map<String, InetSocketAddress> symbolTable = scheduler.done();
         for (String fun : symbolTable.keySet()) {
             RemoteFunction remoteFn = new RemoteFunction(symbolTable.get(fun));
@@ -73,6 +74,12 @@ public class DistrElang {
         
         Interpreter interpreter = new Interpreter(parser.getStatements());
         interpreter.interpret();
+        
+        for (Socket s : ConnectionProxy.Get().getSockets()) {
+            if (s != null && !s.isClosed()) {
+                s.close();
+            }
+        }
     }
 
 }

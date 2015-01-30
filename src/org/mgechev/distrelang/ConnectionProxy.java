@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.mgechev.distrelang.messages.Message;
+import org.mgechev.distrelang.messages.MessageTypes;
 import org.mgechev.elang.tokens.Token;
 
 import com.google.gson.Gson;

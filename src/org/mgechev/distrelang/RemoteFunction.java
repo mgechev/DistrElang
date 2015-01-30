@@ -10,11 +10,11 @@ import org.mgechev.elang.parser.expressions.symbols.functions.CustomFunction;
 
 public class RemoteFunction extends CustomFunction {
     private InetSocketAddress addr;
-    
+
     public RemoteFunction(InetSocketAddress addr) {
         this.addr = addr;
     }
-    
+
     @Override
     public Value evaluate() {
         Invoke msg = new Invoke();

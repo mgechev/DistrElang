@@ -91,6 +91,9 @@ public class Program {
     }
     
     public void addFunction(String name, CustomFunction function) {
+        if (this.customFunctions.get(name) != null) {
+            this.customFunctions.remove(name);
+        }
         this.customFunctions.put(name, function);
     }
     

@@ -7,13 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.mgechev.distrelang.messages.Invoke;
 import org.mgechev.distrelang.messages.Message;
@@ -25,14 +20,10 @@ import org.mgechev.elang.common.Program;
 import org.mgechev.elang.parser.Parser;
 import org.mgechev.elang.parser.expressions.symbols.Value;
 import org.mgechev.elang.parser.expressions.symbols.functions.CustomFunction;
-import org.mgechev.elang.parser.statements.IStatement;
 import org.mgechev.elang.tokens.Token;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.sun.xml.internal.bind.CycleRecoverable.Context;
-
-import sun.org.mozilla.javascript.internal.json.JsonParser;
 
 public class Server extends Thread {
 
@@ -47,8 +38,10 @@ public class Server extends Thread {
         fn.setArguments(msg.args);
         Value result = fn.evaluate();
         Return res = new Return();
+        System.out.println("Invoking function " + msg.name);
         res.name = msg.name;
         res.result = result;
+        System.out.println("Function " + msg.name + " result is " + res.result);
         this.send(res, socket);
     }
     
@@ -93,31 +86,39 @@ public class Server extends Thread {
     
     public void run() {
         try {
-            final ServerSocket socket = new ServerSocket(this.port);
-            final Server self = this;
+            ServerSocket socket = new ServerSocket(this.port);
             Socket client = socket.accept();
             System.out.println("Client connected");
-            OutputStream os = client.getOutputStream();
             InputStream is = client.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            Parser parser;
             Gson gson = new GsonBuilder().registerTypeAdapter(Token.class, new InterfaceAdapter<Token>()).create();
             while (!socket.isClosed()) {
                 String line = reader.readLine();
-                Message fn = gson.fromJson(line, Message.class);
-                System.out.println("Message received " + line);
-                switch (fn.type) {
+                Message msg = gson.fromJson(line, Message.class);
+                System.out.println("Message received " + line + "\n");
+                if (msg == null) {
+                    socket.close();
+                    return;
+                }
+                switch (msg.type) {
                 case INVOKE:
-                    self.invokeFunction(gson.fromJson(line, Invoke.class), client);
+                    this.invokeFunction(gson.fromJson(line, Invoke.class), client);
+                    break;
                 case REGISTER:
-                    self.registerFunction(gson.fromJson(line, RegisterFunction.class), client);
+                    this.registerFunction(gson.fromJson(line, RegisterFunction.class), client);
+                    break;
                 case SYMBOL_TABLE:
-                    self.saveSymbolTable(gson.fromJson(line, SymbolTable.class));
+                    this.saveSymbolTable(gson.fromJson(line, SymbolTable.class));
+                    break;
+                default:
+                    System.out.println("Unknown message");
+                    break;
                 }
             }
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }                            
+        }
     }
     
 }

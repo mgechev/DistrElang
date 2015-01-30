@@ -23,7 +23,6 @@ public class Expression implements IExpression {
         Stack<Symbol> stack = new Stack<Symbol>();
         Symbol current;
         IExpression temp;
-        Value tempResult;
         while (i < exprSize) {
             current = this.expression.get(i);
             if (!isEvaluator(current)) {
