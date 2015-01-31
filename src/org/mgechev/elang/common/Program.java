@@ -17,6 +17,13 @@ public class Program {
     private Stack<HashMap<String, Value>> vars;
     private HashMap<String, CustomFunction> customFunctions;
     
+    private static ThreadLocal<Program> THREAD_LOCAL = new ThreadLocal() {
+        @Override
+        protected Program initialValue() {
+            return new Program();
+        }
+    };
+    
     private Program() {
         this.vars = new Stack<HashMap<String, Value>>();
         this.vars.push(new HashMap<String, Value>());
@@ -61,10 +68,7 @@ public class Program {
     }
     
     public static Program Get() {
-        if (INSTANCE == null) {
-            INSTANCE = new Program();
-        }
-        return INSTANCE;
+        return THREAD_LOCAL.get();
     }
     
     public Value getVar(String name) {

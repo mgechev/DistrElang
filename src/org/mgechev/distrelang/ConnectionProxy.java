@@ -24,11 +24,11 @@ import com.google.gson.GsonBuilder;
 public class ConnectionProxy {
 
     private Map<InetSocketAddress, Socket> cache;
+    private int uid;
+    private static int COUNT;
     
     public ConnectionProxy() {
-        synchronized (this) {
-            cache = new HashMap<InetSocketAddress, Socket>();
-        }
+        cache = new HashMap<InetSocketAddress, Socket>();
     }
     
     public synchronized Socket getSocket(InetSocketAddress addr) throws UnknownHostException, IOException {
@@ -45,7 +45,7 @@ public class ConnectionProxy {
         return this.cache.values();
     }
     
-    public synchronized void send(Message msg, InetSocketAddress addr) throws IOException {
+    public void send(Message msg, InetSocketAddress addr) throws IOException {
         Socket socket = this.getSocket(addr);
         Gson gson = new GsonBuilder().registerTypeAdapter(Token.class, new InterfaceAdapter<Token>()).create();
         String toSend = gson.toJson(msg);
@@ -55,7 +55,7 @@ public class ConnectionProxy {
         writer.flush();
     }
     
-    public synchronized Message read(InetSocketAddress addr, Class type) throws IOException {
+    public Message read(InetSocketAddress addr, Class type) throws IOException {
         Socket socket = this.getSocket(addr);
         InputStream is = socket.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
