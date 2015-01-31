@@ -18,10 +18,12 @@ public class Scheduler {
     private ArrayList<InetSocketAddress> hosts;
     private Map<RemoteFunctionData, InetSocketAddress> symbolTable;
     private int current = 0;
+    private ConnectionProxy proxy;
     
-    public Scheduler(ArrayList<InetSocketAddress> hosts) {
+    public Scheduler(ArrayList<InetSocketAddress> hosts, ConnectionProxy proxy) {
         this.hosts = hosts;
         symbolTable = new HashMap<RemoteFunctionData, InetSocketAddress>();
+        this.proxy = proxy;
     }
     
     public void register(ArrayList<Token> tokens) throws IOException {
@@ -29,8 +31,8 @@ public class Scheduler {
         current += 1;
         RegisterFunction msg = new RegisterFunction();
         msg.tokens = tokens;
-        ConnectionProxy.Get().send(msg, host);
-        RegisterComplete res = (RegisterComplete)ConnectionProxy.Get().read(host, RegisterComplete.class);
+        proxy.send(msg, host);
+        RegisterComplete res = (RegisterComplete)proxy.read(host, RegisterComplete.class);
         RemoteFunctionData f = res.data;
         this.symbolTable.put(f, host);
     }
@@ -45,9 +47,13 @@ public class Scheduler {
             table.table.put(data.name, this.symbolTable.get(data));
         }
         for (InetSocketAddress addr : this.hosts) {
-            ConnectionProxy.Get().send(table, addr);;
+            proxy.send(table, addr);;
         }
         return this.symbolTable;
+    }
+    
+    public ConnectionProxy getProxy() {
+        return this.proxy;
     }
 
 }

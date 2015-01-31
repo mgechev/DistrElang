@@ -69,7 +69,7 @@ public class DistrElang {
         Map<RemoteFunctionData, InetSocketAddress> symbolTable = scheduler.done();
         Map<String, Function> lookup = new HashMap<String, Function>();
         for (RemoteFunctionData fun : symbolTable.keySet()) {
-            RemoteFunction f = new RemoteFunction(symbolTable.get(fun), fun.argsCount);
+            RemoteFunction f = new RemoteFunction(symbolTable.get(fun), fun.argsCount, scheduler.getProxy());
             f.setName(fun.name);
             lookup.put(fun.name, f);
         }
@@ -83,7 +83,7 @@ public class DistrElang {
         Interpreter interpreter = new Interpreter(parser.getStatements());
         interpreter.interpret();
         
-        for (Socket s : ConnectionProxy.Get().getSockets()) {
+        for (Socket s : scheduler.getProxy().getSockets()) {
             if (s != null && !s.isClosed()) {
                 s.close();
             }

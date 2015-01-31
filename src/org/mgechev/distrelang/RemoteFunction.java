@@ -12,14 +12,16 @@ import org.mgechev.elang.parser.expressions.symbols.functions.CustomFunction;
 
 public class RemoteFunction extends CustomFunction {
     private InetSocketAddress addr;
+    private ConnectionProxy proxy;
 
-    public RemoteFunction(InetSocketAddress addr) {
-        this(addr, 0);
+    public RemoteFunction(InetSocketAddress addr, ConnectionProxy proxy) {
+        this(addr, 0, proxy);
     }
     
-    public RemoteFunction(InetSocketAddress addr, int count) {
+    public RemoteFunction(InetSocketAddress addr, int count, ConnectionProxy proxy) {
         super(count);
         this.addr = addr;
+        this.proxy = proxy;
     }
 
     @Override
@@ -31,13 +33,13 @@ public class RemoteFunction extends CustomFunction {
             msg.args.add(((IExpression)expr).evaluate());
         }
         try {
-            ConnectionProxy.Get().send(msg, addr);
+            proxy.send(msg, addr);
         } catch (IOException e) {
             e.printStackTrace();
         }
         Return res;
         try {
-            res = (Return) ConnectionProxy.Get().read(addr, Return.class);
+            res = (Return) proxy.read(addr, Return.class);
             return res.result;
         } catch (IOException e) {
             e.printStackTrace();

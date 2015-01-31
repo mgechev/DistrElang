@@ -33,13 +33,18 @@ import com.google.gson.GsonBuilder;
 public class Server extends Thread {
 
     private int port;
+    private ConnectionProxy proxy;
 
-    public Server(int port) {
+    public Server(int port, ConnectionProxy proxy) {
         this.port = port;
+        this.proxy = proxy;
     }
     
     private void invokeFunction(Invoke msg, Socket socket) throws IOException {
         CustomFunction fn = Program.Get().getFunction(msg.name);
+        if (msg.name.equals("complex")) {
+            System.out.print("TEST");
+        }
         for (Value val : msg.args) {
             fn.setOperand(val);
         }
@@ -87,7 +92,7 @@ public class Server extends Thread {
     
     private void saveSymbolTable(SymbolTable msg) {
         for (String fun : msg.table.keySet()) {
-            RemoteFunction remoteFn = new RemoteFunction(msg.table.get(fun), msg.args.get(fun));
+            RemoteFunction remoteFn = new RemoteFunction(msg.table.get(fun), msg.args.get(fun), this.proxy);
             if (Program.Get().getFunction(fun) == null) {
                 Program.Get().addFunction(fun, remoteFn);
             }
