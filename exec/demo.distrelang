@@ -14,12 +14,6 @@ def complex(a, b)
   return multi(add2(a), b);
 enddef;
 
-print 'Add 1 and 2: ';
-print add(1, 2);
-print ', ';
-print 'add 2 to 40: ';
-print add2(40);
-print ', ';
-print '(2 + 2) * 3: ';
-print complex(2, 3);
-print '.';
+
+print '(19 + 2) * 2 = ';
+print complex(19, 2);
