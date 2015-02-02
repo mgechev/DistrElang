@@ -11,20 +11,12 @@ import org.mgechev.elang.parser.expressions.symbols.functions.CustomFunction;
 
 public class Program {
 
-    private static Program INSTANCE = null;
     private ArrayList<String> functions;
     private ArrayList<String> statements;
     private Stack<HashMap<String, Value>> vars;
     private HashMap<String, CustomFunction> customFunctions;
     
-    private static ThreadLocal<Program> THREAD_LOCAL = new ThreadLocal() {
-        @Override
-        protected Program initialValue() {
-            return new Program();
-        }
-    };
-    
-    private Program() {
+    public Program() {
         this.vars = new Stack<HashMap<String, Value>>();
         this.vars.push(new HashMap<String, Value>());
         
@@ -65,10 +57,6 @@ public class Program {
 
     public boolean isStatement(String arg) {
         return this.statements.indexOf(arg) >= 0;
-    }
-    
-    public static Program Get() {
-        return THREAD_LOCAL.get();
     }
     
     public Value getVar(String name) {

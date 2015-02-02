@@ -43,8 +43,8 @@ public class DistrElang {
         program = currentProgram;
     }
     
-    public static void execute(Scheduler scheduler) throws IOException {
-        Lexer l = new Lexer(program);
+    public static void execute(Scheduler scheduler, Program prog) throws IOException {
+        Lexer l = new Lexer(program, prog);
         ArrayList<Token> lst = l.lex();
         ArrayList<Token> fn = null;
         boolean functionDef = false;
@@ -69,13 +69,13 @@ public class DistrElang {
         Map<RemoteFunctionData, InetSocketAddress> symbolTable = scheduler.done();
         Map<String, Function> lookup = new HashMap<String, Function>();
         for (RemoteFunctionData fun : symbolTable.keySet()) {
-            RemoteFunction f = new RemoteFunction(symbolTable.get(fun), fun.argsCount, scheduler.getProxy());
+            RemoteFunction f = new RemoteFunction(symbolTable.get(fun), fun.argsCount, scheduler.getProxy(), prog);
             f.setName(fun.name);
             lookup.put(fun.name, f);
         }
         
         
-        Parser parser = new Parser(lst, lookup);
+        Parser parser = new Parser(lst, prog);
         parser.parse();
         
         Interpreter interpreter = new Interpreter(parser.getStatements());

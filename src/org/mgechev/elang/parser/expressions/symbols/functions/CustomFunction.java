@@ -18,15 +18,17 @@ public class CustomFunction extends Function {
     protected ArrayList<Variable> funcArgs;
     protected ArrayList<IStatement> statements;
     protected String name;
+    protected Program program;
     
-    public CustomFunction() {
-        this(0);
+    public CustomFunction(Program program) {
+        this(program, 0);
     }
     
-    public CustomFunction(int args) {
+    public CustomFunction(Program program, int args) {
         super(args);
         this.funcArgs = null;
         this.statements = null;
+        this.program = program;
     }
     
     //funcVars are the variables which must be declared for the function
@@ -54,7 +56,7 @@ public class CustomFunction extends Function {
             current += 1;
         }
         
-        Program.Get().pushScope(vars);
+        program.pushScope(vars);
         
         try {
             Interpreter interpreter = new Interpreter(this.statements);
@@ -63,7 +65,7 @@ public class CustomFunction extends Function {
             result = e.getResult();
         }
         
-        Program.Get().popScope();
+        program.popScope();
         
         return result;
     }

@@ -15,10 +15,12 @@ public class Lexer {
 
     private String program;
     private int current;
+    private Program prog;
     
-    public Lexer(String program) {
+    public Lexer(String program, Program prog) {
         this.current = 0;
         this.program = program;
+        this.prog = prog;
     }
     
     private String getNumber() {
@@ -61,9 +63,9 @@ public class Lexer {
                     currentToken = new NumberToken(this.getNumber());
                 } else if (this.isAlphabet(this.current()) || this.isUnderscore(this.current())) {
                     currentSymbol = this.getString();
-                    if (Program.Get().isFunction(currentSymbol)) {
+                    if (this.prog.isFunction(currentSymbol)) {
                         currentToken = new FunctionToken(currentSymbol);
-                    } else if (Program.Get().isStatement(currentSymbol)) {
+                    } else if (this.prog.isStatement(currentSymbol)) {
                         currentToken = new KeyWordToken(currentSymbol);
                     } else if (currentSymbol.matches("(true|false)")) {
                         currentToken = new BooleanToken(currentSymbol);

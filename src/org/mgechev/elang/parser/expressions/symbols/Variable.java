@@ -5,21 +5,25 @@ import org.mgechev.elang.parser.expressions.IExpression;
 
 public class Variable extends Symbol<String> implements IExpression {
     
-    public Variable(String name, Value value) {
-        this(name);
-        Program.Get().setVal(this.value, value);
+    private Program program;
+    
+    public Variable(String name, Value value, Program program) {
+        this(name, program);
+        this.program = program;
+        program.setVal(this.value, value);
     }
     
-    public Variable(String name) {
+    public Variable(String name, Program program) {
         super(name);
+        this.program = program;
     }
     
     public Value evaluate() {
-        return Program.Get().getVar(this.value);
+        return program.getVar(this.value);
     }
     
     public void setValue(Value val) {
-        Program.Get().setVal(this.value, val);
+        program.setVal(this.value, val);
     }
     
 }

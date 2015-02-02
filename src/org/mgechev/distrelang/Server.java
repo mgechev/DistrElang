@@ -34,20 +34,24 @@ import com.google.gson.GsonBuilder;
 
 public class Server extends Thread {
 
+    private Program program;
     private int port;
     private ConnectionProxy proxy;
     // Required because we don't know all the functions' names in the
     // moment of parsing the program
     private List<ArrayList<Token>> buffer;
+    private List<ClientHandler> handlers;
 
-    public Server(int port, ConnectionProxy proxy) {
+    public Server(int port, ConnectionProxy proxy, Program program) {
         this.port = port;
         this.proxy = proxy;
         this.buffer = new ArrayList<ArrayList<Token>>();
+        this.handlers = new ArrayList<Server.ClientHandler>();
+        this.program = program;
     }
     
-    private void invokeFunction(Invoke msg, Socket socket) throws IOException {
-        CustomFunction fn = Program.Get().getFunction(msg.name);
+    private synchronized void invokeFunction(Invoke msg, Socket socket) throws IOException {
+        CustomFunction fn = program.getFunction(msg.name);
         for (Value val : msg.args) {
             fn.setOperand(val);
         }
@@ -58,12 +62,12 @@ public class Server extends Thread {
         this.send(res, socket);
     }
     
-    private void registerFunction(RegisterFunction msg, Socket client) throws IOException {
-        Object[] names = Program.Get().getFunctionsNames().toArray();
+    private synchronized void registerFunction(RegisterFunction msg, Socket client) throws IOException {
+        Object[] names = program.getFunctionsNames().toArray();
         buffer.add(msg.tokens);
-        Parser parser = new Parser(msg.tokens);
+        Parser parser = new Parser(msg.tokens, program);
         parser.parse();
-        Object[] newNames = Program.Get().getFunctionsNames().toArray();
+        Object[] newNames = program.getFunctionsNames().toArray();
         
         for (Object name : newNames) {
             boolean exists = false;
@@ -74,7 +78,7 @@ public class Server extends Thread {
             }
             if (!exists) {
                 RegisterComplete response = new RegisterComplete();
-                Function fn = Program.Get().getFunction(name.toString());
+                Function fn = program.getFunction(name.toString());
                 RemoteFunctionData data = new RemoteFunctionData();
                 data.name = name.toString();
                 data.argsCount = fn.getArgumentsCount();
@@ -85,7 +89,7 @@ public class Server extends Thread {
         }
     }
     
-    private void send(Message msg, Socket socket) throws IOException {
+    private synchronized void send(Message msg, Socket socket) throws IOException {
         Gson gson = new GsonBuilder().registerTypeAdapter(Token.class, new InterfaceAdapter<Token>()).create();
         String toSend = gson.toJson(msg);
         OutputStream os = socket.getOutputStream();
@@ -94,52 +98,71 @@ public class Server extends Thread {
         writer.flush();
     }
     
-    private void saveSymbolTable(SymbolTable msg) {
+    private synchronized void saveSymbolTable(SymbolTable msg) {
         for (String fun : msg.table.keySet()) {
             Host host = msg.table.get(fun);
-            RemoteFunction remoteFn = new RemoteFunction(new InetSocketAddress(host.hostname, host.port), msg.args.get(fun), this.proxy);
+            RemoteFunction remoteFn = new RemoteFunction(new InetSocketAddress(host.hostname, host.port), msg.args.get(fun), this.proxy, program);
             remoteFn.setName(fun);
             try {
-                Program.Get().getFunction(fun);
+                program.getFunction(fun);
             } catch (Exception e) {
-                Program.Get().addFunction(fun, remoteFn);
+                program.addFunction(fun, remoteFn);
             }
         }
         for (ArrayList<Token> tokens : this.buffer) {
-            Parser p = new Parser(tokens);
+            Parser p = new Parser(tokens, program);
             p.parse();
+        }
+    }
+    
+    public class ClientHandler extends Thread {
+        private Socket socket;
+        public ClientHandler(Socket socket) {
+            this.socket = socket;
+        }
+        
+        public void run() {
+            try {
+                InputStream is = socket.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                Gson gson = new GsonBuilder().registerTypeAdapter(Token.class, new InterfaceAdapter<Token>()).create();
+                while (!socket.isClosed()) {
+                    String line = reader.readLine();
+                    Message msg = gson.fromJson(line, Message.class);
+                    if (msg == null) {
+                        socket.close();
+                        return;
+                    }
+                    switch (msg.type) {
+                    case INVOKE:
+                        Server.this.invokeFunction(gson.fromJson(line, Invoke.class), socket);
+                        break;
+                    case REGISTER:
+                        Server.this.registerFunction(gson.fromJson(line, RegisterFunction.class), socket);
+                        break;
+                    case SYMBOL_TABLE:
+                        Server.this.saveSymbolTable(gson.fromJson(line, SymbolTable.class));
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                socket.close();
+            } catch (IOException e) {
+                
+            }
         }
     }
     
     public void run() {
         try {
             ServerSocket socket = new ServerSocket(this.port);
-            Socket client = socket.accept();
-            InputStream is = client.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            Gson gson = new GsonBuilder().registerTypeAdapter(Token.class, new InterfaceAdapter<Token>()).create();
-            while (!socket.isClosed()) {
-                String line = reader.readLine();
-                Message msg = gson.fromJson(line, Message.class);
-                if (msg == null) {
-                    socket.close();
-                    return;
-                }
-                switch (msg.type) {
-                case INVOKE:
-                    this.invokeFunction(gson.fromJson(line, Invoke.class), client);
-                    break;
-                case REGISTER:
-                    this.registerFunction(gson.fromJson(line, RegisterFunction.class), client);
-                    break;
-                case SYMBOL_TABLE:
-                    this.saveSymbolTable(gson.fromJson(line, SymbolTable.class));
-                    break;
-                default:
-                    break;
-                }
+            Socket client;
+            while ((client = socket.accept()) != null) {
+                ClientHandler handler = new ClientHandler(client);
+                this.handlers.add(handler);
+                handler.start();
             }
-            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

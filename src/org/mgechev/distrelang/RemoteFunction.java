@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import org.mgechev.distrelang.messages.Invoke;
 import org.mgechev.distrelang.messages.Return;
+import org.mgechev.elang.common.Program;
 import org.mgechev.elang.parser.expressions.IExpression;
 import org.mgechev.elang.parser.expressions.symbols.Value;
 import org.mgechev.elang.parser.expressions.symbols.functions.CustomFunction;
@@ -14,12 +15,12 @@ public class RemoteFunction extends CustomFunction {
     private InetSocketAddress addr;
     private ConnectionProxy proxy;
 
-    public RemoteFunction(InetSocketAddress addr, ConnectionProxy proxy) {
-        this(addr, 0, proxy);
+    public RemoteFunction(InetSocketAddress addr, ConnectionProxy proxy, Program program) {
+        this(addr, 0, proxy, program);
     }
     
-    public RemoteFunction(InetSocketAddress addr, int count, ConnectionProxy proxy) {
-        super(count);
+    public RemoteFunction(InetSocketAddress addr, int count, ConnectionProxy proxy, Program program) {
+        super(program, count);
         this.addr = addr;
         this.proxy = proxy;
     }

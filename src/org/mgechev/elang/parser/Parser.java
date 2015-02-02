@@ -59,19 +59,15 @@ public class Parser {
     
     private ArrayList<IStatement> statements;
     private ArrayList<Token> tokens;
-    private Map<String, Function> lookup;
+    private Program program;
     
     private int currentToken;
     
-    public Parser(ArrayList<Token> tokens) {
-        this(tokens, null);
-    }
-    
-    public Parser(ArrayList<Token> tokens, Map<String, Function> lookup) {
+    public Parser(ArrayList<Token> tokens, Program program) {
         this.statements = new ArrayList<IStatement>();
         this.tokens = tokens;
         this.currentToken = 0;
-        this.lookup = lookup;
+        this.program = program;
     }
     
     public ArrayList<IStatement> getStatements() {
@@ -129,7 +125,7 @@ public class Parser {
             current = this.tokens.get(currentToken);
 
             if (current instanceof NameToken) {
-                funcArgs.add(new Variable(current.value().toString()));
+                funcArgs.add(new Variable(current.value().toString(), program));
             }
         }
         return funcArgs;
@@ -153,9 +149,9 @@ public class Parser {
         currentToken += 1;
         String name = this.tokens.get(currentToken).value().toString();
         
-        CustomFunction function = new CustomFunction();
+        CustomFunction function = new CustomFunction(program);
         //Adding the function instantly because of the recursion
-        Program.Get().addFunction(name, function);
+        program.addFunction(name, function);
         currentToken += 1;
         Token current = this.tokens.get(currentToken);
         if (!current.value().equals(Operators.OB)) {
@@ -352,10 +348,10 @@ public class Parser {
             currentToken++;
             current = this.tokens.get(currentToken);
             if (isFunction(current) && current.value().equals("read")) {
-                block.add(new AssignmentStatement(new Variable(name, null), new Read()));
+                block.add(new AssignmentStatement(new Variable(name, null, program), new Read()));
             } else {
                 IExpression expr = this.parseExpression(Operators.SCL);
-                block.add(new AssignmentStatement(new Variable(name, null), expr));
+                block.add(new AssignmentStatement(new Variable(name, null, program), expr));
             }
         } else {
             throw new RuntimeException("Invalid syntax.");
@@ -378,9 +374,9 @@ public class Parser {
     private Symbol convertToken(Token token) {
         Symbol result = null;
         String name = token.value().toString();
-        if (isVar(token) && !Program.Get().functionExists(name)) {
+        if (isVar(token) && !program.functionExists(name)) {
         //    if (Program.Get().variableExists(varName)) {
-                return new Variable(name);
+                return new Variable(name, program);
         //    } else {
         //        throw new RuntimeException("The variable " + varName + "is not declared.");
         //    }
@@ -489,13 +485,7 @@ public class Parser {
         } else if (func.equals("read")) {
             return new Read();
         } else {
-            if (lookup != null) {
-                Function fn = lookup.get(func);
-                if (fn != null) {
-                    return fn;
-                }
-            }
-            return Program.Get().getFunction(func);
+            return program.getFunction(func);
         }
     }
     
@@ -516,7 +506,7 @@ public class Parser {
     }
     
     private boolean isVar(Token token) {
-        if (token instanceof NameToken && !Program.Get().functionExists(token.value().toString())) {
+        if (token instanceof NameToken && !program.functionExists(token.value().toString())) {
             return true;
         }
         return false;
@@ -544,7 +534,7 @@ public class Parser {
     }
     
     private boolean isFunction(Token token) {
-        if ((token instanceof FunctionToken) || Program.Get().functionExists(token.value().toString())) {
+        if ((token instanceof FunctionToken) || program.functionExists(token.value().toString())) {
             return true;
         }
         return false;
