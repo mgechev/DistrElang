@@ -3,12 +3,30 @@ package org.mgechev.distrelang;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
+        
+//        if (args[0].equals("client")) {
+//            ArrayList<InetSocketAddress> hosts = new ArrayList<InetSocketAddress>();
+//            for (int i = 2; i < args.length; i += 1) {
+//                String host = args[i];
+//                String[] parts = host.split(":");
+//                hosts.add(new InetSocketAddress(Inet4Address.getByName(parts[0]), Integer.parseInt(parts[1])));
+//            }
+//            Scheduler scheduler = new Scheduler(hosts, new ConnectionProxy());
+//            DistrElang.loadProgramFile(args[1]);
+//            DistrElang.execute(scheduler);
+//        } else if (args[0].equals("server")) {
+//            int port = Integer.parseInt(args[1]);
+//            new Server(port, new ConnectionProxy()).start();
+//        } else {
+//            throw new RuntimeException("The component is not recognized");
+//        }
+
+
         ArrayList<InetSocketAddress> hosts = new ArrayList<InetSocketAddress>();
         hosts.add(new InetSocketAddress(Inet4Address.getByName("127.0.0.1"), 55555));
         hosts.add(new InetSocketAddress(Inet4Address.getByName("127.0.0.1"), 55554));
@@ -22,27 +40,27 @@ public class Main {
         Server s3 = new Server(55553, new ConnectionProxy());
         s3.start();
         
-        DistrElang.loadProgramString("def sum(a, b)"
-                + "return a + b;"
-                + "enddef;"
-                + "def sum2(a)"
-                + "return sum(a, 2);"
-                + "enddef;"
-                + "def multi(a, b)"
-                + "return a * b;"
-                + "enddef;"
-                + "def complex(a, b)"
-                + "temp = sum2(a);"
-                + "return multi(a, b);"
-                + "enddef;"
-                + "print sum(1, 2);"
-                + "print '\n';"
-                + "print sum2(3);"
-                + "print '\n';"
-                + "print multi(8, 8);"
-                + "print '\n';"
-                + "print complex(2, 3);"
-                + "print '\n';");
+        DistrElang.loadProgramString("def add(a, b)" +
+"  return a + b;" +
+"enddef;" +
+
+"def add2(a)" +
+"  return add(a, 2);" +
+"enddef;" +
+
+"def multi(a, b)" +
+"  return a * b;" +
+"enddef;" +
+
+"def complex(a, b)" +
+"  f = add2(a);" +
+"  return multi(f, b);" +
+"enddef;" +
+
+"print 'Add 2 to 40: ';" +
+"print add2(40);" +
+"print '   ';");
+        
         DistrElang.execute(scheduler);
     }
     

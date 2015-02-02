@@ -78,8 +78,6 @@ public class DistrElang {
         Parser parser = new Parser(lst, lookup);
         parser.parse();
         
-        Function f = Program.Get().getFunction("sum");
-        
         Interpreter interpreter = new Interpreter(parser.getStatements());
         interpreter.interpret();
         
