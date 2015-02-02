@@ -7,11 +7,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.mgechev.distrelang.messages.Host;
 import org.mgechev.distrelang.messages.Invoke;
 import org.mgechev.distrelang.messages.Message;
 import org.mgechev.distrelang.messages.RegisterComplete;
@@ -34,10 +36,14 @@ public class Server extends Thread {
 
     private int port;
     private ConnectionProxy proxy;
+    // Required because we don't know all the functions' names in the
+    // moment of parsing the program
+    private List<ArrayList<Token>> buffer;
 
     public Server(int port, ConnectionProxy proxy) {
         this.port = port;
         this.proxy = proxy;
+        this.buffer = new ArrayList<ArrayList<Token>>();
     }
     
     private void invokeFunction(Invoke msg, Socket socket) throws IOException {
@@ -54,6 +60,7 @@ public class Server extends Thread {
     
     private void registerFunction(RegisterFunction msg, Socket client) throws IOException {
         Object[] names = Program.Get().getFunctionsNames().toArray();
+        buffer.add(msg.tokens);
         Parser parser = new Parser(msg.tokens);
         parser.parse();
         Object[] newNames = Program.Get().getFunctionsNames().toArray();
@@ -89,12 +96,18 @@ public class Server extends Thread {
     
     private void saveSymbolTable(SymbolTable msg) {
         for (String fun : msg.table.keySet()) {
-            RemoteFunction remoteFn = new RemoteFunction(msg.table.get(fun), msg.args.get(fun), this.proxy);
+            Host host = msg.table.get(fun);
+            RemoteFunction remoteFn = new RemoteFunction(new InetSocketAddress(host.hostname, host.port), msg.args.get(fun), this.proxy);
+            remoteFn.setName(fun);
             try {
                 Program.Get().getFunction(fun);
             } catch (Exception e) {
                 Program.Get().addFunction(fun, remoteFn);
             }
+        }
+        for (ArrayList<Token> tokens : this.buffer) {
+            Parser p = new Parser(tokens);
+            p.parse();
         }
     }
     

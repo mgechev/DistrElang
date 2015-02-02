@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 
 public class SymbolTable extends Message {
-    public Map<String, InetSocketAddress> table;
+    public Map<String, Host> table;
     public Map<String, Integer> args;
     
     public SymbolTable() {

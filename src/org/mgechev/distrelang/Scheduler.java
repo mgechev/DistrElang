@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mgechev.distrelang.messages.Host;
 import org.mgechev.distrelang.messages.RegisterComplete;
 import org.mgechev.distrelang.messages.RegisterFunction;
 import org.mgechev.distrelang.messages.RemoteFunctionData;
@@ -40,11 +41,15 @@ public class Scheduler {
     public Map<RemoteFunctionData, InetSocketAddress> done() throws IOException {
         SymbolTable table = new SymbolTable();
         table.args = new HashMap<String, Integer>();
-        table.table = new HashMap<String, InetSocketAddress>();
+        table.table = new HashMap<String, Host>();
         
         for (RemoteFunctionData data : this.symbolTable.keySet()) {
             table.args.put(data.name, data.argsCount);
-            table.table.put(data.name, this.symbolTable.get(data));
+            InetSocketAddress address = this.symbolTable.get(data);
+            Host host = new Host();
+            host.hostname = address.getHostName();
+            host.port = address.getPort();
+            table.table.put(data.name, host);
         }
         for (InetSocketAddress addr : this.hosts) {
             proxy.send(table, addr);;
