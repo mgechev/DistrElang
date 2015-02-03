@@ -162,6 +162,7 @@ public class Server extends Thread {
                 this.handlers.add(handler);
                 handler.start();
             }
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
