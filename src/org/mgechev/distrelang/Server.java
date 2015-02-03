@@ -25,7 +25,6 @@ import org.mgechev.elang.common.Program;
 import org.mgechev.elang.parser.Parser;
 import org.mgechev.elang.parser.expressions.symbols.Function;
 import org.mgechev.elang.parser.expressions.symbols.Value;
-import org.mgechev.elang.parser.expressions.symbols.Variable;
 import org.mgechev.elang.parser.expressions.symbols.functions.CustomFunction;
 import org.mgechev.elang.tokens.Token;
 

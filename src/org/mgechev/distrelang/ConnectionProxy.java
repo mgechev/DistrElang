@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.mgechev.distrelang.messages.Message;
-import org.mgechev.distrelang.messages.MessageTypes;
 import org.mgechev.elang.tokens.Token;
 
 import com.google.gson.Gson;
@@ -24,8 +23,6 @@ import com.google.gson.GsonBuilder;
 public class ConnectionProxy {
 
     private Map<InetSocketAddress, Socket> cache;
-    private int uid;
-    private static int COUNT;
     
     public ConnectionProxy() {
         cache = new HashMap<InetSocketAddress, Socket>();
